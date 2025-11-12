@@ -75,6 +75,13 @@ button:active {
     opacity:0;
 }
 
+.gensiCard{
+    width: 100;
+    height: auto;
+    
+    
+}
+
 #displayCards{
     margin: 0 auto;
     margin-top:1%;
@@ -95,7 +102,13 @@ button:active {
 .below5{
     margin-top:30px;
     position: absolute;
+    width: 70;
+    height: auto;
+    
+    
 }
+
+
 
 #displayCard1{
     margin-left:-190px;
@@ -122,6 +135,10 @@ button:active {
     margin-top:0px;
     /* absoluteで他の画像と自動で作られる距離を無視できる */
     position: absolute;
+    width: 50;
+    height: auto;
+    
+    
 }
 
 #displayCard6{
@@ -213,7 +230,7 @@ button:active {
     display: none; /* 最初は非表示 */
     justify-content: center;
     align-items: center;
-    z-index: 9999;
+    z-index: 6000;
   }
 
   /* 中央のウィンドウ（iframe） */
@@ -222,9 +239,28 @@ button:active {
     height: 80%;
     border: none;
     border-radius: 10px;
-    background-color: white;
+    background-color: white; 
   }
 
+.bunsiDisplay {
+    display: inline-block;
+    width: 80px;
+    height: 130px;
+    border-radius: 10px;
+     border:3px solid #3de0ff;
+    text-align: left;
+    padding: 10px; 
+    font-size: 23px;
+    
+}
+
+.bunsiDisplay.none {
+    border: 3px dashed #28879a;
+}
+
+.bunsiDisplay.none .bunsiNum {
+    opacity: 0;
+}
 
 #myPoint{
     /* position: absolute; */
