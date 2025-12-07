@@ -67,11 +67,11 @@ const formula = [
   "O3",
   "C2H2",
   "H2O2",
-  "CH2O",
+  "HCHO",
   "NH3",
   "CH4",
   "C2H4",
-  "NH2",
+  "H4N2",
   "CH3OH",
   "CH3CHO",//以下遊び方②
   "C2H6",
