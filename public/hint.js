@@ -15,6 +15,16 @@ const bunsi = {
   12: [4, 2, 0, 0], //エチレン
   13: [4, 0, 2, 0], //ヒドラシン
   14: [4, 1, 0, 1], //メタノール
+  15: [4, 2, 0, 1], //アセトアルデヒド　以下遊び方②
+  16: [6, 2, 0, 0], //エタン
+  17: [4, 4, 0, 0], //テトラヘドラン
+  18: [4, 2, 0, 2], //酢酸
+  19: [6, 2, 0, 1], //エタノール
+  20: [6, 3, 0, 0], //シクロプロパン
+  21: [4, 1, 2, 1], //尿素
+  22: [6, 3, 0, 3], //乳酸
+  23: [5, 2, 1, 2], //グリシン
+  24: [7, 3, 1, 2], //アラニン
 };
 //bunsiに対応した順で分子の名前を保存
 const bunsiName = [
@@ -33,7 +43,19 @@ const bunsiName = [
   "エチレン",
   "ヒドラシン",
   "メタノール",
+  "アセトアルデヒド",//以下遊び方②
+  "エタン",
+  "テトラヘドラン",
+  "酢酸",
+  "エタノール",
+  "シクロプロパン",
+  "尿素",
+  "乳酸",
+  "グリシン",
+  "アラニン",
 ];
+
+
 
 const formula = [
   "H2",
@@ -45,12 +67,23 @@ const formula = [
   "O3",
   "C2H2",
   "H2O2",
-  "HCHO",
+  "CH2O",
   "NH3",
   "CH4",
   "C2H4",
-  "H4N2",
+  "NH2",
   "CH3OH",
+  "CH3CHO",//以下遊び方②
+  "C2H6",
+  "C4H4",
+  "CH3COOH",
+  "CH3CH2OH",
+  "C3H6",
+  "(NH2)2CO",
+  "CH3CH(OH)COOH",
+  "H2NCH2COOH",
+  "CH3CH(COOH)NH2",
+  
 ];
 
 // img.loading = "eager";
@@ -80,7 +113,7 @@ for (let i = 0; i < Object.keys(bunsi).length; i++) {
     clone.querySelectorAll("img")[3].classList.add("hide");
     clone.querySelectorAll("span")[3].classList.add("hide");
   }
-  clone.querySelector(".bunsi").src = "hint_pings/" + formula[i] + ".png";
+  clone.querySelector(".bunsi").src = "hint_pings/" + bunsiName[i] + ".png";
   document.body.appendChild(clone);
   clone.querySelector(".bunsiName").innerText = bunsiName[i];
   clone.querySelector(".bunsiFormula").innerText = formula[i];
