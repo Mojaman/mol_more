@@ -113,7 +113,7 @@ for (let i = 0; i < Object.keys(bunsi).length; i++) {
     clone.querySelectorAll("img")[3].classList.add("hide");
     clone.querySelectorAll("span")[3].classList.add("hide");
   }
-  clone.querySelector(".bunsi").src = "hint_pings/" + bunsiName[i] + ".png";
+  clone.querySelector(".bunsi").src = "hint_pings/" + formula[i] + ".png";
   document.body.appendChild(clone);
   clone.querySelector(".bunsiName").innerText = bunsiName[i];
   clone.querySelector(".bunsiFormula").innerText = formula[i];
