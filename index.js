@@ -95,6 +95,7 @@ io.on("connection", (socket) => {
       return;
     }
 
+    //これ再戦時初期化されてる？どこで？
     console.log("roomId:" + roomId);
     rooms[roomId] = {
       players: {},
@@ -122,6 +123,24 @@ io.on("connection", (socket) => {
         1: null,
         2: null,
       },
+      bunsiInfo:{
+        //プレイヤー番号
+        1: {
+          //分子index(自分から見て左から)
+          //h,c,n,o
+          0: [0,0,0,0],
+          1: [0,0,0,0],
+          2: [0,0,0,0],
+          3: [0,0,0,0],
+        },
+        2: {
+          //分子index(自分から見て左から)
+          0: [0,0,0,0],
+          1: [0,0,0,0],
+          2: [0,0,0,0],
+          3: [0,0,0,0],
+        },
+      }
     };
 
     // プレイヤーを部屋に追加
@@ -370,9 +389,52 @@ io.on("connection", (socket) => {
     io.to(roomId).emit("reloadPlayerName", rooms[roomId].names)
   });
 
-  socket.on("debug", (roomId) => {
-    io.to(roomId).emit("mix")
+  socket.on("sendStockBunsi", (roomId, displayInfo, dataNum, playerNum) => {
+    if (!rooms[roomId]) {
+      // roomIdが未定義の場合、エラー処理を行う
+      console.error("Room not found:", roomId, displayInfo, dataNum, playerNum);
+      return;
+    }
+
+    if (!rooms[roomId].bunsiInfo) {
+      // bunsiInfoが未定義の場合、エラー処理を行う
+      console.error("bunsiInfo is missing in room:", roomId);
+      return;
+    }
+
+    if (playerNum !== 1 && playerNum !== 2) {
+      // playerNumが1または2でない場合、エラー処理を行う
+      console.error("Invalid player number:", playerNum);
+      return;
+    }
+
+    //rooms[roomId].bunsiInfo[playerNum][dataNum] = displayInfo;
+    rooms[roomId].bunsiInfo[playerNum][dataNum] = displayInfo;
+
+    io.to(roomId).emit("reloadStockBunsi", playerNum, displayInfo, dataNum);
   });
+
+  //クライアント側に分子の情報を渡すやつ
+  socket.on("getBunsiInfo", (roomId) => {
+    io.to(socket.id).emit("getBunsiInfo_response", rooms[roomId].bunsiInfo);
+  });
+
+  socket.on("updatePublicGensi", (roomId, gensoArray) => {
+    for(let i = 0; i < gensoArray.length; i++) {
+      if(gensoArray[i]) {
+        rooms[roomId].gensiInfo["publicgensi" + (i + 1)] = gensoArray[i];
+      }
+    }
+console.log(gensoArray);
+    io.to(roomId).emit("updatePublicGensi_response", rooms[roomId].gensiInfo);
+  });
+
+  socket.on("debug", (roomId) => {
+    //io.to(roomId).emit("mix")
+    console.log(rooms[roomId].gensiInfo);
+  });
+
+ 
 
   //ここより上に処理をかく
 });
