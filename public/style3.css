@@ -33,6 +33,13 @@ button {
   transition: all 0.1s ease-in-out;
 
 }
+#debugButton {
+    font-size: 10px;
+    padding: 3px;
+    border: 2px solid #ff6a00;
+    background-color: #ffd9a8;
+    color: #000000;
+}
 
 button:hover {
   background-color: #1c5d75;
@@ -49,6 +56,12 @@ button:active {
     top: 10px;
     left: 10px;
     z-index: 1000;
+}
+
+#stock {
+    margin-left: -80px;
+    background-color: #9e3700;
+    border: 3px solid #ff855c;
 }
 
 .card{
@@ -258,9 +271,55 @@ button:active {
     border: 3px dashed #28879a;
 }
 
+/* 点滅アニメーションの定義 */
+@keyframes blinking {
+  0%   { opacity: 0.3; }
+  100% { opacity: 1; }
+}
+
 .bunsiDisplay.none .bunsiNum {
     opacity: 0;
 }
+
+.bunsiDisplay.none.elected {
+    background-color: #00a1d8;
+    animation: blinking 0.5s ease-in-out infinite alternate;
+}
+
+.bunsiH b {
+    color: #01c7ff;
+}
+
+.bunsiC b {
+    color: #30201f;
+}
+
+.bunsiN b{
+    color: #0155fe;
+}
+
+.bunsiO b {
+    color: #fe2b2a;
+}
+
+#screenFilter {
+  position: fixed;
+  inset: 0; /* 画面全体 */
+  background: rgb(245, 149, 71, 0.1); /* 好きな色や濃さに */
+  pointer-events: none; /* クリックを邪魔しない */
+  display: none; /* 初期状態は非表示 */
+  z-index: 9999;
+}
+
+#command {
+    display: none;
+    margin-bottom 10px;
+}
+
+#debugButton {
+    display: none;
+}
+
 
 #myPoint{
     /* position: absolute; */
