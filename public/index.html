@@ -25,53 +25,64 @@
     </style>
   </head>
   <body>
+    <div id="screenFilter"></div>
+    
     <nav>
       <button id = "homeButton" onclick= showPage('home')>ホーム</button>
-       <button onclick= showPage('game')>ゲーム(debug)</button> 
+       <!-- <button onclick= showPage('game')>ゲーム(debug)</button>  -->
       <!-- <button onclick= showPage('waiting')>待機中(debug)</button>
       <button onclick= showPage('result')>リザルト(debug)</button>
-      <button onclick= nextTurn()>ターン変更(debug)</button>
-      <button onclick= debug()>debug!</button> -->
+      <button onclick= nextTurn()>ターン変更(debug)</button> -->
+      <button onclick= debug()>debug</button>
     </nav>
+
+    <input type="text" id="command" name="command"  required>
+    
+    <button id="debugButton">実行ボタン</button>
 
     <div id = "game" class = "page">
     <section>
       <section>
-        <img
-          id="tecCard1"
-          class="topCards line1 tecCard card hide"
-          src="pngs/テクニカルカード.png"
-          alt="テクニカルカード"
-          width="100"
-          height="150"
-        />
-
-        <img
-          id="bunsiCard1"
+        <!-- <img
+          id="bunsiCard0"
           class="topCards line1 bunsiCard card"
           src="pngs/分子カード.png"
           alt="分子ココ"
           width="100"
           height="150"
-        />
+        /> -->
 
-        <img
-          id="bunsiCard2"
-          class="topCards line1 bunsiCard card"
-          src="pngs/分子カード.png"
-          alt="分子ココ"
-          width="100"
-          height="150"
-        />
+        <div class="bunsiDisplay" data-num="7">
+          <div class="bunsiH bunsiNum"><b>H</b> …<span class = Hnum>0</span></div>
+          <div class="bunsiC bunsiNum"><b>C</b> …<span class = Cnum>0</span></div>
+          <div class="bunsiN bunsiNum"><b>N</b> …<span class = Nnum>0</span></div>
+          <div class="bunsiO bunsiNum"><b>O</b> …<span class = Onum>0</span></div>
+          
+        </div>
 
-        <img
-          id="bunsiCard3"
-          class="topCards line1 bunsiCard card"
-          src="pngs/分子カード.png"
-          alt="分子ココ"
-          width="100"
-          height="150"
-        />
+        <div class="bunsiDisplay" data-num="6">
+          <div class="bunsiH bunsiNum"><b>H</b> …<span class = Hnum>0</span></div>
+          <div class="bunsiC bunsiNum"><b>C</b> …<span class = Cnum>0</span></div>
+          <div class="bunsiN bunsiNum"><b>N</b> …<span class = Nnum>0</span></div>
+          <div class="bunsiO bunsiNum"><b>O</b> …<span class = Onum>0</span></div>
+           
+        </div>
+
+        <div class="bunsiDisplay" data-num="5">
+          <div class="bunsiH bunsiNum"><b>H</b> …<span class = Hnum>0</span></div>
+          <div class="bunsiC bunsiNum"><b>C</b> …<span class = Cnum>0</span></div>
+          <div class="bunsiN bunsiNum"><b>N</b> …<span class = Nnum>0</span></div>
+          <div class="bunsiO bunsiNum"><b>O</b> …<span class = Onum>0</span></div>
+
+        </div>
+
+        <div class="bunsiDisplay" data-num="4">
+          <div class="bunsiH bunsiNum"><b>H</b> …<span class = Hnum>0</span></div>
+          <div class="bunsiC bunsiNum"><b>C</b> …<span class = Cnum>0</span></div>
+          <div class="bunsiN bunsiNum"><b>N</b> …<span class = Nnum>0</span></div>
+          <div class="bunsiO bunsiNum"><b>O</b> …<span class = Onum>0</span></div>
+
+        </div>
 
         <!-- 重ねサンプル→ <img class = "bunsiCard6 topCards card" src="分子.png" style="position: absolute; left: 313px; top: 10px;" alt="分子ココ" width="100" height="150"> -->
       </section>
@@ -248,6 +259,7 @@
 
       <button id ="reset" onclick = "displayResetable()">リセット</button>
       <button id="mix">調合！</button>
+      <button id="stock">ストック</button>
 
       <!-- プレイヤーのカードここから↓ -->
       <section>
@@ -295,42 +307,38 @@
       <br />
 
       <section>
-        <img
-         id="bunsiCard4"
-          class="underCards line4 bunsiCard card"
-          src="pngs/分子カード.png"
-          alt="分子ココ"
-          width="100"
-          height="150"
-        />
 
-        <img
-          id="bunsiCard5"
-          class="underCards line4 bunsiCard card"
-          src="pngs/分子カード.png"
-          alt="分子ココ"
-          width="100"
-          height="150"
-        />
+        <div class="bunsiDisplay" data-num="0">
+          <div class="bunsiH bunsiNum"><b>H</b> …<span class = Hnum>0</span></div>
+          <div class="bunsiC bunsiNum"><b>C</b> …<span class = Cnum>0</span></div>
+          <div class="bunsiN bunsiNum"><b>N</b> …<span class = Nnum>0</span></div>
+          <div class="bunsiO bunsiNum"><b>O</b> …<span class = Onum>0</span></div>
 
-        <img
-          id="bunsiCard6"
-          class="underCards line4 bunsiCard card"
-          src="pngs/分子カード.png"
-          alt="分子ココ"
-          width="100"
-          height="150"
-        />
+        </div>
 
-        <img
-          onclick="shuffle()"
-          id="tecCard2"
-          class="underCards line4 tecCard card hide"
-          src="pngs/テクニカルカード.png"
-          alt="テクニカルカード"
-          width="100"
-          height="150"
-        />
+        <div class="bunsiDisplay" data-num="1">
+          <div class="bunsiH bunsiNum"><b>H</b> …<span class = Hnum>0</span></div>
+          <div class="bunsiC bunsiNum"><b>C</b> …<span class = Cnum>0</span></div>
+          <div class="bunsiN bunsiNum"><b>N</b> …<span class = Nnum>0</span></div>
+          <div class="bunsiO bunsiNum"><b>O</b> …<span class = Onum>0</span></div>
+
+        </div>
+
+        <div class="bunsiDisplay" data-num="2">
+          <div class="bunsiH bunsiNum"><b>H</b> …<span class = Hnum>0</span></div>
+          <div class="bunsiC bunsiNum"><b>C</b> …<span class = Cnum>0</span></div>
+          <div class="bunsiN bunsiNum"><b>N</b> …<span class = Nnum>0</span></div>
+          <div class="bunsiO bunsiNum"><b>O</b> …<span class = Onum>0</span></div>
+
+        </div>
+
+        <div class="bunsiDisplay" data-num="3">
+          <div class="bunsiH bunsiNum"><b>H</b> …<span class = Hnum>0</span></div>
+          <div class="bunsiC bunsiNum"><b>C</b> …<span class = Cnum>0</span></div>
+          <div class="bunsiN bunsiNum"><b>N</b> …<span class = Nnum>0</span></div>
+          <div class="bunsiO bunsiNum"><b>O</b> …<span class = Onum>0</span></div>
+
+        </div>
       </section>
     </section>
 
@@ -346,8 +354,9 @@
 
 
      <div id = "home" class = "page active">
-       
-        <h1>molモット！<span id = "version">β版</span></h1>
+
+       <!-- タイトルロゴ改善の余地あり -->
+        <h1><ruby>mol<rp>(</rp><rt>モル</rt><rp>)</rp></ruby><span>モット！</span><span id = "version">β版</span></h1>
 
        <section id = "setName">
           <label for="inputId">名前を設定</label>
