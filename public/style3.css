@@ -154,31 +154,40 @@ button:active {
     
 }
 
-#displayCard6{
+.over8{
+    margin-top:80px;
+    /* absoluteで他の画像と自動で作られる距離を無視できる */
+    position: absolute;
+    width: 50;
+    height: auto;
+}
+
+
+#displayCard6,#displayCard13{
     margin-left:-190px;
 }
 
-#displayCard7{
+#displayCard7,#displayCard14{
     margin-left:-135px;
 }
 
-#displayCard8{
+#displayCard8,#displayCard15{
     margin-left:-80px;
 }
 
-#displayCard9{
+#displayCard9,#displayCard16{
     margin-left:-25px;
 }
 
-#displayCard10{
+#displayCard10,#displayCard17{
     margin-left:30px;
 }
 
-#displayCard11{
+#displayCard11,#displayCard18{
     margin-left:85px;
 }
 
-#displayCard12{
+#displayCard12,#displayCard19{
     margin-left:140px;
 }
 
@@ -269,6 +278,10 @@ button:active {
 
 .bunsiDisplay.none {
     border: 3px dashed #28879a;
+}
+
+.bunsiDisplay.dark {
+    background-color: rgba(0, 0, 0, 0.2);
 }
 
 /* 点滅アニメーションの定義 */
