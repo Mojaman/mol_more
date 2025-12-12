@@ -1,4 +1,4 @@
-// サーバーと接続開始
+//// サーバーと接続開始
 const socket = io();
 //カードオブジェクト
 const Cards = {
@@ -114,6 +114,8 @@ let ableClick = true;
 let isDebug = false;
 //index側のpublic原子の配列を保存
 let publicgensi = [];
+//分子の状態を保存する配列(非共有、0→未選択　1→選択済み)
+let bunsiStatus = [0, 0, 0, 0, 0, 0, 0, 0];
 //原子カードの配列
 const gensiP = [
   "h",
@@ -189,7 +191,7 @@ const bunsiName = [
   "エチレン",
   "ヒドラシン",
   "メタノール",
-  "アセトアルデヒド",//以下遊び方②
+  "アセトアルデヒド", //以下遊び方②
   "エタン",
   "テトラヘドラン",
   "酢酸",
@@ -359,6 +361,8 @@ function reset() {
 
   displayInfo = [0, 0, 0, 0];
 
+  bunsiStatus = [0, 0, 0, 0, 0, 0, 0, 0];
+
   myPoint = 0;
 
   opponentPoint = 0;
@@ -382,6 +386,7 @@ function reset() {
 }
 
 socket.on("nextTurn", (Turn, isCount) => {
+  resetElectedBunsi();
   turn = Turn;
   //ストック状態をリセット
   isStock = false;
@@ -433,6 +438,8 @@ function shuffle() {
     document.getElementById(gensiSelect).src = imgName;
   }
   gensiCardStatus = [0, 0, 0, 0, 0, 0];
+
+  bunsiStatus = [0, 0, 0, 0, 0, 0, 0, 0];
 
   document.querySelectorAll(".displayCard").forEach((el) => {
     el.classList.add("hide");
@@ -537,24 +544,38 @@ socket.on("reloadDisplay", (selected) => {
 });
 
 function displayReload(genso) {
-  display.push(genso);
-  console.log("display:", display);
-  for (let i = 0; i < display.length; i++) {
-    document.getElementById("displayCard" + (i + 1)).classList.add("hide");
-  }
-  if (display.length <= 5) {
-    for (let i = 0; i < display.length; i++) {
-      document.getElementById("displayCard" + (i + 1)).src =
-        "pngs/" + display[i] + ".png";
-      document.getElementById("displayCard" + (i + 1)).classList.remove("hide");
-    }
+  let gensoArray = [];
+  if (Array.isArray(genso)) {
+    gensoArray = genso;
   } else {
-    for (let i = 0; i < display.length; i++) {
-      document.getElementById("displayCard" + (i + 6)).src =
-        "pngs/" + display[i] + ".png";
-      document.getElementById("displayCard" + (i + 6)).classList.remove("hide");
-    }
+    gensoArray.push(genso);
   }
+  //alert(`546` + gensoArray);
+  //書き方あってる？
+  gensoArray.forEach((element) => {
+    display.push(element);
+    console.log("display:", display);
+    for (let i = 0; i < display.length; i++) {
+      document.getElementById("displayCard" + (i + 1)).classList.add("hide");
+    }
+    if (display.length <= 5) {
+      for (let i = 0; i < display.length; i++) {
+        document.getElementById("displayCard" + (i + 1)).src =
+          "pngs/" + display[i] + ".png";
+        document
+          .getElementById("displayCard" + (i + 1))
+          .classList.remove("hide");
+      }
+    } else {
+      for (let i = 0; i < display.length; i++) {
+        document.getElementById("displayCard" + (i + 6)).src =
+          "pngs/" + display[i] + ".png";
+        document
+          .getElementById("displayCard" + (i + 6))
+          .classList.remove("hide");
+      }
+    }
+  });
 
   checkDisplay();
 }
@@ -574,19 +595,24 @@ function displayResetable() {
   cancelStock();
 }
 
+//displayのリセット処理
 socket.on("displayReset", () => {
   console.log("displayReset");
   display = [];
   displayInfo = [0, 0, 0, 0];
   system.whatBunsi.innerText = " ";
   gensiCardStatus = [0, 0, 0, 0, 0, 0];
-  for (let i = 0; i < 12; i++) {
-    document.getElementById("displayCard" + (i + 1)).classList.add("hide");
-  }
+  bunsiStatus = [0, 0, 0, 0, 0, 0, 0, 0];
+  document.querySelectorAll(".displayCard").forEach((el) => {
+    el.classList.add("hide");
+  });
+  document.querySelectorAll(".gensiCard").forEach((el) => {
+    el.classList.remove("dark");
+  });
+  document.querySelectorAll(".bunsiDisplay").forEach((el) => {
+    el.classList.remove("dark");
+  });
 
-  for (let i = 0; i < 6; i++) {
-    document.getElementById("gensiCard" + (i + 1)).classList.remove("dark");
-  }
   countDeck(); //line488
 });
 
@@ -798,18 +824,8 @@ socket.on("sentAlert", (message) => {
 });
 
 Buttons.mix.addEventListener("click", () => {
-  let condition1 =
-    gensiCardStatus[0] == 1 ||
-    gensiCardStatus[1] == 1 ||
-    gensiCardStatus[2] == 1;
-  let condition2 =
-    gensiCardStatus[3] == 1 ||
-    gensiCardStatus[4] == 1 ||
-    gensiCardStatus[5] == 1;
-  if (condition1 && condition2) {
+  if (checkBothUsed()) {
     checkTurn(sendMix);
-  } else {
-    window.alert("相手のカードと自分のカードを最低Ⅰ枚ずつは使いましょう");
   }
 });
 
@@ -1161,12 +1177,44 @@ Cards.bunsiDisplay.forEach((display) => {
         //alert("stock")
       }
     } else {
-      //おそらくここに問題あり
       cancelStock();
-      // alert("unko")
-      //これ大丈夫？
+      //await書かなくていいのなぜ
+      if (bunsiStatus[display.dataset.num] === 0) {
+        bunsiStatus[display.dataset.num] = 1;
+        checkTurn(() => eventUpdateDisplay(display.dataset.num));
+      }
     }
   });
+});
+
+const eventUpdateDisplay = async (num) => {
+  //ストックした分子を使用する時の処理
+  socket.emit("addBunsiDark", roomId, num, playerNumber);
+  const gensoArray = await getBunsiInfoByDataNum(num);
+  //alert(Array.isArray(gensoArray));
+  //数字から元素へ変換する必要がある
+
+  //しくみ理解できてない callback関数がとる引数
+  const mapedGensoArray = gensoArray
+    .map((count, index) => Array(count).fill(genso[index]))
+    .flat();
+
+  updateDisplay(mapedGensoArray);
+};
+
+//選択された分子を暗くする処理
+socket.on("addBunsiDark_response", (dataNum, playerNum) => {
+  let elNum;
+  if (Number(dataNum) > 3) {
+    elNum = playerNum === playerNumber ? dataNum : Number(dataNum) - 4;
+  } else {
+   elNum = playerNum === playerNumber ? dataNum : Number(dataNum) + 4;
+  }
+  //elはDOM要素
+  //alert(playerNumber);
+  const el = electBunsi(elNum);
+  el.classList.add("dark");
+  //↑調合/ストック時darkがあるbunsiの表示をなくす処理はリセットボタンのとこに
 });
 
 //調合ボタンとストックボタンを切り替えたり、その演出を追加する関数
@@ -1227,14 +1275,45 @@ function stock() {
 
 //自分のカードと相手のカードを少なくとも一枚ずつは選択してるか調べる関数
 function checkBothUsed() {
-  let condition1 =
-    gensiCardStatus[0] == 1 ||
-    gensiCardStatus[1] == 1 ||
-    gensiCardStatus[2] == 1;
-  let condition2 =
-    gensiCardStatus[3] == 1 ||
-    gensiCardStatus[4] == 1 ||
-    gensiCardStatus[5] == 1;
+  let condition1;
+  let condition2;
+
+  if (playerNumber === 1) {
+    condition1 =
+      gensiCardStatus[0] == 1 ||
+      gensiCardStatus[1] == 1 ||
+      gensiCardStatus[2] == 1 ||
+      bunsiStatus[4] == 1 ||
+      bunsiStatus[5] == 1 ||
+      bunsiStatus[6] == 1 ||
+      bunsiStatus[7] == 1;
+    condition2 =
+      gensiCardStatus[3] == 1 ||
+      gensiCardStatus[4] == 1 ||
+      gensiCardStatus[5] == 1 ||
+      bunsiStatus[0] == 1 ||
+      bunsiStatus[1] == 1 ||
+      bunsiStatus[2] == 1 ||
+      bunsiStatus[3] == 1;
+  } else {
+    condition1 =
+      gensiCardStatus[0] == 1 ||
+      gensiCardStatus[1] == 1 ||
+      gensiCardStatus[2] == 1 ||
+      bunsiStatus[0] == 1 ||
+      bunsiStatus[1] == 1 ||
+      bunsiStatus[2] == 1 ||
+      bunsiStatus[3] == 1;
+    condition2 =
+      gensiCardStatus[3] == 1 ||
+      gensiCardStatus[4] == 1 ||
+      gensiCardStatus[5] == 1 ||
+      bunsiStatus[4] == 1 ||
+      bunsiStatus[5] == 1 ||
+      bunsiStatus[6] == 1 ||
+      bunsiStatus[7] == 1;
+  }
+
   if (condition1 && condition2) {
     return true;
   } else {
@@ -1257,6 +1336,15 @@ function getBunsiInfo() {
 
 //分子のdataNumを指定してその分子がストック済みでないかどうか調べる関数(bool型をreturn)
 async function checkNotStocked(dataNum) {
+  const gensoArray = await getBunsiInfoByDataNum(dataNum);
+  //alert(electNum + "array" + gensoArray)
+  // console.log(bunsiInfo);
+
+  return !gensoArray.some((item) => item !== 0);
+}
+
+//渡されたdatanumの分子スロットの中身を配列で返す関数
+async function getBunsiInfoByDataNum(dataNum) {
   const bunsiInfo = await getBunsiInfo();
   if (dataNum - 3 > 0) {
     electNum = dataNum - 4;
@@ -1265,11 +1353,7 @@ async function checkNotStocked(dataNum) {
     electNum = dataNum;
     pNum = playerNumber;
   }
-  const gensoArray = bunsiInfo[pNum][electNum];
-  //alert(electNum + "array" + gensoArray)
-  console.log(bunsiInfo);
-
-  return !gensoArray.some((item) => item !== 0);
+  return bunsiInfo[pNum][electNum];
 }
 
 //長さ6の配列を受け取り、サーバー側でpublicgensiを更新する関数
@@ -1346,6 +1430,33 @@ function replaceElectedGensiRandom() {
   updatePublicGensi(gensoArray, true);
 }
 
+//引数に渡した元素1つを互いのdisplayに反映させる関数
+//↑配列で渡せるように変えよう
+function updateDisplay(genso) {
+  socket.emit("updateDisplay", roomId, genso);
+}
+
+socket.on("updateDisplay_response", (genso) => {
+  displayReload(genso);
+});
+
+//選択されている分子スロットの中身をリセットしてbunsiDisplayもnoneにする
+function resetElectedBunsi() {
+ const bunsiDisplays = document.querySelectorAll(".bunsiDisplay");
+  bunsiDisplays.forEach((display, index) => {
+    if (display.classList.contains("dark")) {
+      display.classList.add("none");
+      display.classList.remove("dark");
+      //publicの方をリセットする処理
+      if(index > 3){
+        socket.emit("resetElectedBunsi", roomId, index - 4, playerNumber);
+      }
+    }
+  })
+}
+
+/////////////////////////////////////////////
+
 //文字列,1以上の数,はtrue/null,0はfalse
 function debug() {
   //publicgensi = ["n", "n", "n", "o", "o", "o"];
@@ -1397,15 +1508,24 @@ function debug() {
   }
 }
 
+//displayReload()
 debugButton.addEventListener("click", () => {
- const commandStr = commandInput.value.split("");
+  if (commandInput.value === "next") {
+    nextTurn();
+  } else if (commandInput.value.substring(0, 7) === "display") {
+    updateDisplay([...commandInput.value.substring(7)]);
+    //alert(display);
+  } else if(commandInput.value === "socket"){
+    socket.emit("debug", roomId);
+  }else {
+    const commandStr = commandInput.value.split("");
 
-  let array = [null, null, null, null, null, null];
-  
-  for (let i = 0; i < commandStr.length; i+=2) {
-    array[Number(commandStr[i])] = commandStr[i + 1];
+    let array = [null, null, null, null, null, null];
 
+    for (let i = 0; i < commandStr.length; i += 2) {
+      array[Number(commandStr[i])] = commandStr[i + 1];
+    }
+
+    updatePublicGensi(array, false);
   }
-
-  updatePublicGensi(array, false);
 });
