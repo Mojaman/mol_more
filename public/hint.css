@@ -50,12 +50,14 @@ hr {
 .bunsiName {
     white-space: nowrap;
     font-size:80%;
+    
 }
 
 .bunsiFormula {
     white-space: nowrap;
     font-size:150%;
     font-weight: bold;
+    font-size: clamp(90%, 5vw, 150%);
 }
 
 .hide {
