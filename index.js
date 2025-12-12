@@ -58,14 +58,13 @@ io.on("connection", (socket) => {
           beforeNum = number;
           // console.log("makableRoomNum:" + makableRoomNum);
         }
-        
+
         if (rooms[roomNum].playerCount === 1) {
           //returnして部屋に参加
           //console.log(roomNum)
-          joinRoom(roomNum, condition)
+          joinRoom(roomNum, condition);
           return;
         }
-       
       }
       //console.log("number:" + number);
     }
@@ -75,8 +74,7 @@ io.on("connection", (socket) => {
     }
 
     //作成！
-    
-    
+
     io.to(socket.id).emit("makeStrayRoom", makableRoomNum);
   });
 
@@ -123,24 +121,24 @@ io.on("connection", (socket) => {
         1: null,
         2: null,
       },
-      bunsiInfo:{
+      bunsiInfo: {
         //プレイヤー番号
         1: {
           //分子index(自分から見て左から)
           //h,c,n,o
-          0: [0,0,0,0],
-          1: [0,0,0,0],
-          2: [0,0,0,0],
-          3: [0,0,0,0],
+          0: [0, 0, 0, 0],
+          1: [0, 0, 0, 0],
+          2: [0, 0, 0, 0],
+          3: [0, 0, 0, 0],
         },
         2: {
           //分子index(自分から見て左から)
-          0: [0,0,0,0],
-          1: [0,0,0,0],
-          2: [0,0,0,0],
-          3: [0,0,0,0],
+          0: [0, 0, 0, 0],
+          1: [0, 0, 0, 0],
+          2: [0, 0, 0, 0],
+          3: [0, 0, 0, 0],
         },
-      }
+      },
     };
 
     // プレイヤーを部屋に追加
@@ -166,7 +164,7 @@ io.on("connection", (socket) => {
   });
 
   socket.on("joinroom", (roomId, condition) => {
-   joinRoom(roomId, condition);
+    joinRoom(roomId, condition);
   });
 
   function joinRoom(roomId, condition) {
@@ -181,18 +179,26 @@ io.on("connection", (socket) => {
       };
 
       // console.log(rooms[roomId].finishCondition, condition)
-      if ((rooms[roomId].finishCondition === 0 && condition === 1) || (rooms[roomId].finishCondition === 1 && condition === 0) || (rooms[roomId].finishCondition === 2 && condition === 2)){
+      if (
+        (rooms[roomId].finishCondition === 0 && condition === 1) ||
+        (rooms[roomId].finishCondition === 1 && condition === 0) ||
+        (rooms[roomId].finishCondition === 2 && condition === 2)
+      ) {
         rooms[roomId].finishCondition = Math.floor(Math.random() * 2);
         // console.log("conditionをランダムにしました" + rooms[roomId].finishCondition)
-      }else if ((rooms[roomId].finishCondition === 2 && condition === 0) || (rooms[roomId].finishCondition === 0 && condition === 2)) {
+      } else if (
+        (rooms[roomId].finishCondition === 2 && condition === 0) ||
+        (rooms[roomId].finishCondition === 0 && condition === 2)
+      ) {
         rooms[roomId].finishCondition = 0;
         // console.log("conditionを0にしました" + rooms[roomId].finishCondition)
-      }else if ((rooms[roomId].finishCondition === 2 && condition === 1) || (rooms[roomId].finishCondition === 1 && condition === 2)) {
+      } else if (
+        (rooms[roomId].finishCondition === 2 && condition === 1) ||
+        (rooms[roomId].finishCondition === 1 && condition === 2)
+      ) {
         rooms[roomId].finishCondition = 1;
         // console.log("conditionを1にしました" + rooms[roomId].finishCondition)
-      };
-
-      
+      }
 
       socket.join(roomId);
       socket.emit("player-joined", rooms[roomId].playerCount, roomId);
@@ -205,7 +211,7 @@ io.on("connection", (socket) => {
         socket.to(roomId).emit("game-start");
         //なんでこれ部屋に入っている人にだけ送らるのか？？↓
         socket.emit("game-start");
-        
+
         // game-start後にfinishConditionを送信
         // setTimeout(() => {
         //   io.to(roomId).emit("sendFinishCondition", rooms[roomId].finishCondition);
@@ -214,7 +220,7 @@ io.on("connection", (socket) => {
     } else {
       socket.emit("room-full");
     }
-  };
+  }
 
   socket.on("disconnect", () => {
     // 部屋からプレイヤーを削除
@@ -226,7 +232,6 @@ io.on("connection", (socket) => {
 
         io.to(roomId).emit("player-left");
         delete rooms[roomId];
-        
 
         // 部屋が一人になったら削除
         // if (rooms[roomId].playerCount === 1) {
@@ -386,7 +391,7 @@ io.on("connection", (socket) => {
     rooms[roomId].names[num] = name;
     // console.log(roomId + "プレイヤー" + num + "の名前は" + name);
 
-    io.to(roomId).emit("reloadPlayerName", rooms[roomId].names)
+    io.to(roomId).emit("reloadPlayerName", rooms[roomId].names);
   });
 
   socket.on("sendStockBunsi", (roomId, displayInfo, dataNum, playerNum) => {
@@ -420,21 +425,33 @@ io.on("connection", (socket) => {
   });
 
   socket.on("updatePublicGensi", (roomId, gensoArray) => {
-    for(let i = 0; i < gensoArray.length; i++) {
-      if(gensoArray[i]) {
+    for (let i = 0; i < gensoArray.length; i++) {
+      if (gensoArray[i]) {
         rooms[roomId].gensiInfo["publicgensi" + (i + 1)] = gensoArray[i];
       }
     }
-console.log(gensoArray);
+    console.log(gensoArray);
     io.to(roomId).emit("updatePublicGensi_response", rooms[roomId].gensiInfo);
+  });
+
+  socket.on("updateDisplay", (roomId, genso) => {
+    io.to(roomId).emit("updateDisplay_response", genso);
+  });
+
+  socket.on("addBunsiDark", (roomId, num, playerNum) => {
+    io.to(roomId).emit("addBunsiDark_response", num, playerNum);
+  });
+
+  socket.on("resetElectedBunsi", (roomId, bunsiNum, playerNum) => {
+    rooms[roomId].bunsiInfo[playerNum][bunsiNum] = [0, 0, 0, 0];
+    //console.log(rooms[roomId].bunsiInfo[playerNum][bunsiNum]);
   });
 
   socket.on("debug", (roomId) => {
     //io.to(roomId).emit("mix")
-    console.log(rooms[roomId].gensiInfo);
+    //console.log(rooms[roomId].gensiInfo);
+    console.log(rooms[roomId].bunsiInfo);
   });
-
- 
 
   //ここより上に処理をかく
 });
