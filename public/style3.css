@@ -296,7 +296,7 @@ button:active {
 
 .bunsiDisplay.none.elected {
     background-color: #00a1d8;
-    animation: blinking 0.5s ease-in-out infinite alternate;
+    animation: blinking 0.5s ease-in infinite alternate;
 }
 
 .bunsiH b {
@@ -333,11 +333,132 @@ button:active {
     display: none;
 }
 
+#points {
+    text-align: left;
+    margin-left: 10px;
+}
+
+#displayMyPoint{
+    margin-bottom: 1px;
+}
 
 #myPoint{
     /* position: absolute; */
+    background-color: #22c4ec;
+    /* background: linear-gradient(90deg, rgb(22, 135, 237), rgb(20, 55, 90)); */
+    display: inline-block;
+    position: absolute;
+    height: 25px;
     
 }
+
+#displayOpponentPoint {
+    margin-bottom: 3px;
+}
+
+#opponentPoint {
+    background-color: #ff6a00;
+    display: inline-block;
+    position: absolute;
+    height: 20px;
+}
+
+@keyframes mixPhase1 {
+    
+     0% {
+        transform: translate(0, 0) rotate(0deg);
+        filter: brightness(1);
+      }
+    10% {
+        filter: brightness(2.5);
+    }
+
+      40% {
+        filter: brightness(3.5);
+          transform:
+            translate(var(--rand-x), var(--rand-y))
+            rotate(var(--rand-rot));
+      }
+
+      100% {
+        
+        filter: brightness(1);
+          transform:
+                  translate(var(--rand-x), calc(var(--rand-y) + 10px))
+                  rotate(var(--rand-rot));
+            }
+}
+
+
+.mixPhase1 {
+    --rand-x: 0px;
+    --rand-y: 0px;
+    --rand-rot: 0deg;
+    transition: none;
+    animation: mixPhase1 0.6s ease forwards normal;
+}
+
+@keyframes mixPhase2-delay {
+    from {
+        filter: brightness(1);
+        transform: scale(1) translateY(calc(var(--rand-y) + 10px)) rotate(var(--rand-rot));
+    }
+    to {
+        filter: brightness(1);
+        transform: scale(1) translateY(calc(var(--rand-y) + 10px)) rotate(var(--rand-rot));
+    }
+}
+
+@keyframes mixPhase2 {
+    from {
+        filter: brightness(1);
+        transform: scale(1) translateY(calc(var(--rand-y) + 10px)) rotate(var(--rand-rot));
+    }
+    to {
+        filter: brightness(4);
+        transform: scale(0.5) rotate(0deg) translate(var(--center-x), calc(var(--rand-y) + 30px));
+    }
+
+}
+
+.mixPhase2 {
+    --delay: 0s;
+    --rand-x 0px;
+    --rand-y 0px;
+    --rand-rot 0deg;
+    --center-x: 0px;
+    animation: mixPhase2-delay var(--delay) 0s linear forwards normal, mixPhase2 0.6s var(--delay) ease forwards normal;
+}
+
+@keyframes mixPhase3 {
+    0% {
+        opacity: 0.7;
+        filter: brightness(4);
+        transform: scale(0.5) rotate(0deg) translate(var(--center-x), calc(var(--rand-y) + 30px));
+    }
+    40% {
+        opacity: 1;
+        filter: brightness(6);
+        transform: translate(var(--center-x-2), calc(var(--rand-y) + 30px))  scale(0.2) rotate(0deg);
+    }
+    100% {
+        opacity: 0;
+        filter: brightness(5);
+        transform: translate(var(--center-x-2), calc(var(--rand-y) + 30px)) scale(2) rotate(0deg);
+    }
+}
+
+.mixPhase3 {
+    --center-x: 0px;
+    --center-x-2: 0px;
+    --rand-y: 0px;
+    animation: mixPhase3 1.5s 0s ease-in-out forwards normal;
+}
+
+/* あとは適当にホワイトアウトさせて、真ん中にできた分子の画像数秒乗っけるだけ！ 
+アニメーション後選んでも分子表示されなくなるバグも直して*/
+
+/* リセットしないというCSSをつくり、その実行時間をdelayとして使用すれば遅延を作ってもいちいちリセットされない！！ */
 
 #setting {
     
