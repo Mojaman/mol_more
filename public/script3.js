@@ -112,6 +112,8 @@ let stockBunsiNum = null;
 let ableClick = true;
 //debug状態かどうか
 let isDebug = false;
+//mixのアニメーションを実行中かどうか
+let isMixing = false;
 //index側のpublic原子の配列を保存
 let publicgensi = [];
 //分子の状態を保存する配列(非共有、0→未選択　1→選択済み)
@@ -216,6 +218,13 @@ let displayInfo = [0, 0, 0, 0];
 let genso = ["h", "c", "n", "o"];
 //deckで作成可能な分子の番号を保存するリスト
 let makeableBunsi = [];
+//animationで使うランダムな値を一時的に保存するオブジェクト
+let animationRandomValue = {
+  //0~18枚目のdisplayを管理
+  x: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  y: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  rot: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+};
 
 //export {bunsi, bunsiName};　違うhtmlファイルにあるjsファイル同士ではimport/exportできない！！
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -374,6 +383,9 @@ function reset() {
   setPlayerName();
 
   cancelStock();
+
+  system.myPoint.style.width = String(myPoint * 3) + "%";
+  system.opponentPoint.style.width = String(opponentPoint * 3) + "%"
 
   system.myPoint.innerText = myPoint;
   system.opponentPoint.innerText = opponentPoint;
@@ -917,8 +929,8 @@ socket.on("reloadBlank", (blank) => {
 });
 
 //調合する時のアニメーションを実行する
-function animeMix(visibleCards, isNextTurn, point) {
-  // 表示中のdisplayCardを中央に集合 ちょっと仕組みわかんない
+async function animeMix(visibleCards, isNextTurn, point) {
+  
   for (let i = 0; i < display.length; i++) {
     let card;
     if (display.length <= 5) {
@@ -929,42 +941,24 @@ function animeMix(visibleCards, isNextTurn, point) {
 
     if (!card.classList.contains("hide")) {
       visibleCards.push(card);
-      setTimeout(() => {
-        card.style.transition = "transform 0.7s ease-out";
-        card.style.transform = `translate(${150 - i * 70}px, 50px) scale(1)`;
-      }, i * 150);
     }
   }
 
-  //カードが集合した後（2秒後）に明るくするアニメーション開始
-  setTimeout(() => {
-    visibleCards.forEach((card, index) => {
-      // 最初は暗くする
-      card.style.filter = "brightness(90%)";
+  if(!isNextTurn) {
+    //フェーズ開始
+    await animeMixPhase1(visibleCards);
+    await animeMixPhase2(visibleCards);
+    //alert("フェーズ終了")
+    // setTimeout(() => {
+    //   animeMixPhase3(visibleCards);
+    // }, visibleCards.length / 8 + 0.6)
+    await animeMixPhase3(visibleCards);
 
-      // 順番に明るくしていく
-      setTimeout(() => {
-        card.style.transition = "filter 0.5s ease-out";
-        card.style.filter = "brightness(150%) saturate(1.3)"; // 少し明るく、彩度もアップ
-      }, index * 100); // 100msずつ遅延して明るくする
-    });
-  }, 1000); // カード集合アニメーション完了を待つ
+//animeMixReset(visibleCards, isNextTurn, point);
+    
 
-  // Step 3: さらに輝きエフェクトを追加（オプション）
-  setTimeout(() => {
-    visibleCards.forEach((card, index) => {
-      setTimeout(() => {
-        // 一瞬強く光らせる
-        card.style.filter =
-          "brightness(200%) saturate(1.5) drop-shadow(0 0 10px gold)";
-
-        // その後通常の明るさに戻す
-        // setTimeout(() => {
-        //   card.style.filter = 'brightness(100%)';
-        // }, 500);
-      }, index * 100);
-    });
-  }, 2000);
+  //alert(playerNumber + "フェーズ終了");
+  }
 
   //最後にリセットとポイント
   setTimeout(
@@ -986,14 +980,122 @@ function animeMix(visibleCards, isNextTurn, point) {
 
       isClickable = true;
 
+      //上のフェーズが終わったらpromiseで実行するようにする
       if (isNextTurn) {
         nextTurn();
       }
-      //調合枚数に応じて増やさないと初期化がうまく適応されない↓
+
+      visibleCards.forEach((card) => {
+        //removeも忘れず書く
+        card.classList.remove("mixPhase1");
+        card.classList.remove("mixPhase2");
+        card.classList.remove("mixPhase3")
+      });
+     // 調合枚数に応じて増やさないと初期化がうまく適応されない↓
     },
-    2000 + display.length * 100,
+    2700 + display.length / 0.008,
   );
+ }
+
+//animeMixのリセット処理
+function animeMixReset(visibleCards, isNextTurn, point) {
+  
+   display = [];
+    visibleCards.forEach((card) => {
+      card.style.transform = "";
+      card.style.filter = "";
+      card.classList.add("hide");
+    });
+    system.whatBunsi.innerText = " ";
+    for (let i = 0; i < gensiCardStatus.length; i++) {
+      document
+        .getElementById("gensiCard" + (i + 1))
+        .classList.remove("hide", "dark");
+    }
+
+    socket.emit("socketAddPoint", roomId, point, playerNumber);
+
+    isClickable = true;
+
+    //上のフェーズが終わったらpromiseで実行するようにする
+    if (isNextTurn || true) {
+      nextTurn();
+      alert(`message`);
+    }
+
+    visibleCards.forEach((card) => {
+      //removeも忘れず書く
+      card.classList.remove("mixPhase1");
+      card.classList.remove("mixPhase2");
+      card.classList.remove("mixPhase3");
+    });
 }
+
+//フェーズ1
+async function animeMixPhase1 (cards) {
+  cards.forEach((card, index) => {
+    card.classList.add("mixPhase1")
+    animationRandomValue.x[index] = Math.random() * 10 - 5;
+    animationRandomValue.y[index] = Math.random() * 10 - 30;
+    animationRandomValue.rot[index] = Math.random() * 30 - 15;
+    card.style.setProperty("--rand-x", `${animationRandomValue.x[index]}px`);
+    card.style.setProperty("--rand-y", `${animationRandomValue.y[index]}px`);
+    card.style.setProperty("--rand-rot", `${animationRandomValue.rot[index]}deg`);
+  });
+  return new Promise((resolve) => {
+    cards.forEach((card) => {
+      card.addEventListener("animationend", () => {
+        resolve();
+      }, { once: true });
+    })
+  });
+}
+
+//フェーズ2
+async function animeMixPhase2 (cards) {
+  let animationCounter = 0;
+  cards.forEach((card, index) => {
+    card.classList.add("mixPhase2");
+    card.style.setProperty("--delay", `${index / 8}s`);
+    card.style.setProperty("--rand-x", `${animationRandomValue.x[index]}px`);
+    card.style.setProperty("--rand-y", `${animationRandomValue.y[index]}px`);
+    card.style.setProperty("--rand-rot", `${animationRandomValue.rot[index]}deg`);
+    card.style.setProperty("--center-x", `${(index - 2) * -150}px`);
+    
+  });
+  return new Promise((resolve) => {
+    cards.forEach((card) => {
+      card.addEventListener("animationend", () => {
+        animationCounter++;
+        if (animationCounter === cards.length * 2 + 1) {
+          resolve();
+        }
+        
+      }, { twice: true });
+    })
+  });
+}
+
+//フェーズ3
+async function animeMixPhase3 (cards) {
+  cards.forEach((card, index) => {
+    card.classList.add("mixPhase3");
+    card.style.setProperty("--center-x", `${(index - 2) * -150}px`);
+    card.style.setProperty("--center-x-2", `${(index - 2) * -75}px`);
+    card.style.setProperty("--rand-y", `${animationRandomValue.y[index]}px`);
+
+  });
+  return new Promise((resolve) => {
+    cards.forEach((card) => {
+      card.addEventListener("animationend", () => {
+        resolve();
+      }, { once: true });
+    })
+  });
+}
+
+
+////mixアニメーション↑
 
 socket.on("addPoint", (point, num) => {
   if (num === playerNumber) {
@@ -1001,6 +1103,10 @@ socket.on("addPoint", (point, num) => {
   } else {
     opponentPoint = point;
   }
+  //バーの長さに反映
+  system.myPoint.style.width = String(myPoint * 3) + "%";
+  system.opponentPoint.style.width = String(opponentPoint * 3) + "%"
+  
   system.myPoint.innerText = myPoint;
   system.opponentPoint.innerText = opponentPoint;
 });
@@ -1517,6 +1623,10 @@ debugButton.addEventListener("click", () => {
     //alert(display);
   } else if(commandInput.value === "socket"){
     socket.emit("debug", roomId);
+  }else if(commandInput.value === "test") {
+    system.myPoint.style.width = String(myPoint * 3) + "%";
+    system.opponentPoint.style.width = String(opponentPoint * 3) + "%"
+    // alert("unko")
   }else {
     const commandStr = commandInput.value.split("");
 
